@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refrigerant Line Sizing & Equivalent Length Calculator</title>
+    <style>
+        :root {
+            --primary: #0056b3;
+            --primary-hover: #004085;
+            --bg-color: #f4f7f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --border-color: #cccccc;
+            --info-bg: #e7f3fe;
+            --info-border: #b3d7ff;
+            --warning-bg: #fff3cd;
+            --warning-border: #ffeba2;
+            --danger-bg: #f8d7da;
+            --danger-border: #f5c6cb;
+            --success-bg: #d4edda;
+            --success-border: #c3e6cb;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        h1, h2, h3 {
+            color: var(--primary);
+            margin-top: 0;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 15px;
+            background-color: #fff;
+            margin-bottom: 20px;
+        }
+
+        .card-header {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 12px;
+            padding-bottom: 5px;
+            border-bottom: 2px solid var(--primary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .form-group label {
+            flex: 1;
+            font-weight: 500;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .form-control-group {
+            display: flex;
+            gap: 5px;
+            flex: 1;
+        }
+
+        input[type="number"], select {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        select.unit-select {
+            width: 90px;
+            background-color: #f0f0f0;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-small {
+            padding: 4px 8px;
+            font-size: 0.8em;
+            width: auto;
+        }
+
+        /* Fittings Table */
+        .fittings-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85em;
+            margin-top: 10px;
+        }
+
+        .fittings-table th, .fittings-table td {
+            border: 1px solid var(--border-color);
+            padding: 6px;
+            text-align: left;
+        }
+
+        .fittings-table th {
+            background-color: #f0f4f8;
+        }
+
+        .fittings-table input {
+            width: 60px;
+            padding: 4px;
+        }
+
+        /* Results & Engineering Info */
+        .result-box {
+            background: #f8f9fa;
+            border-left: 4px solid var(--primary);
+            padding: 12px;
+            margin-bottom: 10px;
+        }
+
+        .result-title {
+            font-size: 0.85em;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .result-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .info-icon {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            background-color: var(--primary);
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 16px;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: left;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 10;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -125px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 0.8em;
+            font-weight: normal;
+            line-height: 1.3;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* Guideline alerts */
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.85em;
+            display: inline-block;
+        }
+
+        .status-good {
+            background-color: var(--success-bg);
+            color: #155724;
+            border: 1px solid var(--success-border);
+        }
+
+        .status-warning {
+            background-color: var(--warning-bg);
+            color: #856404;
+            border: 1px solid var(--warning-border);
+        }
+
+        .status-danger {
+            background-color: var(--danger-bg);
+            color: #721c24;
+            border: 1px solid var(--danger-border);
+        }
+
+        .guideline-card {
+            font-size: 0.85em;
+            line-height: 1.4;
+            border-radius: 4px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 15px;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #555;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: var(--primary);
+            border-bottom: 3px solid var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Refrigerant Line Sizing & Equivalent Length Calculator</h2>
+    <p style="font-size: 0.9em; color: #666;">Comprehensive line sizing with full ASHRAE/Sporlan Equivalent Length calculation module for fittings and valves.</p>
+
+    <div class="grid-2">
+        <!-- LEFT COLUMN: INPUTS -->
+        <div>
+            <!-- System Parameters -->
+            <div class="card">
+                <div class="card-header">
+                    1. System Operating Conditions
+                </div>
+                
+                <div class="form-group">
+                    <label>Refrigerant Type:</label>
+                    <div class="form-control-group">
+                        <select id="refrigerant">
+                            <option value="R410A">R-410A</option>
+                            <option value="R454B" selected>R-454B</option>
+                            <option value="R32">R-32</option>
+                            <option value="R134a">R-134a</option>
+                            <option value="R404A">R-404A</option>
+                            <option value="R407C">R-407C</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Line Type:</label>
+                    <div class="form-control-group">
+                        <select id="lineType" onchange="updateLineTypeDefaults()">
+                            <option value="suction">Suction Line (Vapor)</option>
+                            <option value="liquid" selected>Liquid Line</option>
+                            <option value="discharge">Discharge Line (Hot Gas)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Capacity / Load: 
+                        <span class="tooltip"><span class="info-icon">i</span>
+                            <span class="tooltiptext">Cooling load required by system.</span>
+                        </span>
+                    </label>
+                    <div class="form-control-group">
+                        <input type="number" id="capacity" value="18" step="0.1">
+                        <select id="unitCapacity" class="unit-select" onchange="calculate()">
+                            <option value="tons">tons</option>
+                            <option value="kW">kW</option>
+                            <option value="BTU">BTU/h</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Evaporating Temp:
+                        <span class="tooltip"><span class="info-icon">i</span>
+                            <span class="tooltiptext">Saturated Evaporating Temperature (SET).</span>
+                        </span>
+                    </label>
+                    <div class="form-control-group">
+                        <input type="number" id="evapTemp" value="46" step="1">
+                        <select id="unitEvapTemp" class="unit-select" onchange="convertTemp('evapTemp', this)">
+                            <option value="F">°F</option>
+                            <option value="C">°C</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Liquid/Condensing Temp:
+                        <span class="tooltip"><span class="info-icon">i</span>
+                            <span class="tooltiptext">Saturated Condensing / Liquid Temperature.</span>
+                        </span>
+                    </label>
+                    <div class="form-control-group">
+                        <input type="number" id="liquidTemp" value="94" step="1">
+                        <select id="unitLiquidTemp" class="unit-select" onchange="convertTemp('liquidTemp', this)">
+                            <option value="F">°F</option>
+                            <option value="C">°C</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pipe & Fitting Inputs -->
+            <div class="card">
+                <div class="card-header">
+                    2. Piping & Equivalent Length Module
+                </div>
+
+                <div class="form-group">
+                    <label>Selected Tube Outer Diameter (OD):</label>
+                    <div class="form-control-group">
+                        <select id="pipeSize" onchange="calculate()">
+                            <option value="0.375">3/8" (0.315" ID)</option>
+                            <option value="0.500">1/2" (0.430" ID)</option>
+                            <option value="0.625">5/8" (0.545" ID)</option>
+                            <option value="0.750">3/4" (0.666" ID)</option>
+                            <option value="0.875">7/8" (0.785" ID)</option>
+                            <option value="1.125" selected>1-1/8" (1.025" ID)</option>
+                            <option value="1.375">1-3/8" (1.265" ID)</option>
+                            <option value="1.625">1-5/8" (1.505" ID)</option>
+                            <option value="2.125">2-1/8" (1.985" ID)</option>
+                            <option value="2.625">2-5/8" (2.465" ID)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Actual Straight Pipe Length:</label>
+                    <div class="form-control-group">
+                        <input type="number" id="actualLength" value="10" step="1" onchange="calculate()">
+                        <select id="unitLength" class="unit-select" onchange="calculate()">
+                            <option value="ft">ft</option>
+                            <option value="m">m</option>
+                        </select>
+                    </div>
+                </div>
+
+                <label style="font-weight:bold; font-size: 0.9em;">Fittings & Valves Quantity:</label>
+                <table class="fittings-table">
+                    <thead>
+                        <tr>
+                            <th>Fitting / Valve Type</th>
+                            <th>Qty</th>
+                            <th>Equiv L (ft ea)</th>
+                            <th>Subtotal (ft)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fittingsTableBody">
+                        <!-- Populated dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: RESULTS & ENGINEERING DECISION INFO -->
+        <div>
+            <div class="card">
+                <div class="card-header">
+                    3. Calculated Line Performance
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <div class="result-box">
+                        <div class="result-title">Total Equivalent Length</div>
+                        <div class="result-value" id="resEqLength">10.0 ft</div>
+                        <div style="font-size:0.75em; color:#666;" id="resEqLengthAlt">(3.05 m)</div>
+                    </div>
+                    <div class="result-box">
+                        <div class="result-title">Pressure Drop (ΔP)</div>
+                        <div class="result-value" id="resDeltaP">0.00 psi</div>
+                        <div style="font-size:0.75em; color:#666;" id="resDeltaPAlt">(0.00 bar / 0.00 °F)</div>
+                    </div>
+                    <div class="result-box">
+                        <div class="result-title">Refrigerant Velocity</div>
+                        <div class="result-value" id="resVelocity">0 fpm</div>
+                        <div style="font-size:0.75em; color:#666;" id="resVelocityAlt">(0.0 m/s)</div>
+                    </div>
+                    <div class="result-box">
+                        <div class="result-title">Reynolds Number (Re)</div>
+                        <div class="result-value" id="resReynolds">0</div>
+                        <div style="font-size:0.75em; color:#666;" id="resFlowRegime">Flow Regime</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Engineering Guidance / Decision Support -->
+            <div class="card">
+                <div class="card-header">
+                    4. Engineering Guidance & Recommendations
+                    <span class="tooltip"><span class="info-icon">i</span>
+                        <span class="tooltiptext">Based on ASHRAE Refrigeration Handbook Standards and Sporlan Sizing Guidelines.</span>
+                    </span>
+                </div>
+
+                <div class="tabs">
+                    <div class="tab active" onclick="switchTab('tab-velocity')">Velocity Check</div>
+                    <div class="tab" onclick="switchTab('tab-drop')">Pressure Drop Check</div>
+                    <div class="tab" onclick="switchTab('tab-standards')">Standards & Standards Info</div>
+                </div>
+
+                <div id="tab-velocity" class="tab-content active">
+                    <div id="velocityStatus" class="status-badge status-good">ACCEPTABLE VELOCITY</div>
+                    <div class="guideline-card" id="velocityGuidelineText" style="background: #f0f4f8;">
+                        <!-- JS populated -->
+                    </div>
+                </div>
+
+                <div id="tab-drop" class="tab-content">
+                    <div id="dropStatus" class="status-badge status-good">ACCEPTABLE PRESSURE DROP</div>
+                    <div class="guideline-card" id="dropGuidelineText" style="background: #f0f4f8;">
+                        <!-- JS populated -->
+                    </div>
+                </div>
+
+                <div id="tab-standards" class="tab-content">
+                    <div class="guideline-card" style="background: #fff3cd; border: 1px solid #ffeba2;">
+                        <strong>ASHRAE / Sporlan Engineering Guidelines Summary:</strong>
+                        <ul style="padding-left: 18px; margin-top: 5px;">
+                            <li><strong>Suction Lines:</strong> Max ΔP equivalent to 2°F (1.1°C) saturation temp drop. Min velocity 500-750 fpm (horizontal) or 1000-1500 fpm (vertical risers) for oil return. Max velocity 4000 fpm to prevent noise.</li>
+                            <li><strong>Liquid Lines:</strong> Max ΔP equivalent to 1-2°F saturation drop (typically 3-5 psi) to prevent flashing prior to the expansion valve. Maximum recommended velocity is 300 fpm to prevent liquid hammer.</li>
+                            <li><strong>Discharge Lines:</strong> Max ΔP equivalent to 2°F saturation drop. Min velocity 500-750 fpm for oil entrainment; Max velocity 3000-3500 fpm to avoid noise/vibration.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Equivalent Length Database (in feet) based on Copper Tube Outer Diameter (OD)
+    // Standard L/D equivalent length values adapted from ASHRAE / Sporlan Refrigeration Data
+    const FITTING_DATABASE = {
+        "90_elbow_std": { name: "90° Long Radius / Standard Elbow", values: { "0.375": 0.8, "0.500": 0.9, "0.625": 1.0, "0.750": 1.2, "0.875": 1.4, "1.125": 1.7, "1.375": 2.1, "1.625": 2.4, "2.125": 3.2, "2.625": 3.9 } },
+        "90_elbow_street": { name: "90° Street Elbow / Short Radius", values: { "0.375": 1.3, "0.500": 1.5, "0.625": 1.8, "0.750": 2.0, "0.875": 2.4, "1.125": 2.9, "1.375": 3.5, "1.625": 4.1, "2.125": 5.4, "2.625": 6.6 } },
+        "45_elbow": { name: "45° Elbow", values: { "0.375": 0.4, "0.500": 0.4, "0.625": 0.5, "0.750": 0.6, "0.875": 0.7, "1.125": 0.9, "1.375": 1.0, "1.625": 1.2, "2.125": 1.6, "2.625": 2.0 } },
+        "tee_flow": { name: "Tee (Line Flow)", values: { "0.375": 0.3, "0.500": 0.4, "0.625": 0.5, "0.750": 0.6, "0.875": 0.8, "1.125": 0.9, "1.375": 1.2, "1.625": 1.4, "2.125": 1.8, "2.625": 2.2 } },
+        "tee_branch": { name: "Tee (Branch Flow)", values: { "0.375": 1.8, "0.500": 2.1, "0.625": 2.5, "0.750": 2.9, "0.875": 3.3, "1.125": 4.0, "1.375": 5.0, "1.625": 6.0, "2.125": 8.0, "2.625": 10.0 } },
+        "check_valve": { name: "Check Valve (Globe Type)", values: { "0.375": 8.0, "0.500": 10.0, "0.625": 12.0, "0.750": 15.0, "0.875": 18.0, "1.125": 22.0, "1.375": 28.0, "1.625": 34.0, "2.125": 45.0, "2.625": 55.0 } },
+        "solenoid_valve": { name: "Solenoid Valve", values: { "0.375": 3.5, "0.500": 4.0, "0.625": 5.0, "0.750": 6.0, "0.875": 7.5, "1.125": 9.0, "1.375": 11.5, "1.625": 14.0, "2.125": 18.0, "2.625": 23.0 } },
+        "ball_valve": { name: "Ball Valve (Full Port)", values: { "0.375": 0.4, "0.500": 0.5, "0.625": 0.6, "0.750": 0.7, "0.875": 0.8, "1.125": 1.0, "1.375": 1.2, "1.625": 1.4, "2.125": 1.8, "2.625": 2.2 } },
+        "filter_drier": { name: "Filter Drier / Sight Glass", values: { "0.375": 4.0, "0.500": 5.0, "0.625": 6.0, "0.750": 7.0, "0.875": 8.0, "1.125": 10.0, "1.375": 12.0, "1.625": 14.0, "2.125": 18.0, "2.625": 22.0 } }
+    };
+
+    // Refrigerant Properties Data Simplified Approximation Matrix
+    // Density (lb/ft3), Viscosity (lbf-s/ft2), Sat Pressure Slope (psi/°F)
+    const REFRIGERANT_DATA = {
+        "R454B": {
+            liquidDensity: 60.5, // lb/ft3 @ 94F
+            vaporDensity: 1.88,  // lb/ft3 @ 46F
+            viscosityVapor: 2.74e-7, // lbf-s/ft2
+            viscosityLiquid: 3.50e-7,
+            dpdtLiquid: 2.1,  // psi/°F drop
+            dpdtVapor: 1.8
+        },
+        "R410A": {
+            liquidDensity: 64.0,
+            vaporDensity: 2.10,
+            viscosityVapor: 2.80e-7,
+            viscosityLiquid: 3.60e-7,
+            dpdtLiquid: 2.4,
+            dpdtVapor: 2.0
+        },
+        "R134a": {
+            liquidDensity: 73.0,
+            vaporDensity: 0.85,
+            viscosityVapor: 2.50e-7,
+            viscosityLiquid: 4.00e-7,
+            dpdtLiquid: 1.2,
+            dpdtVapor: 0.95
+        },
+        "R32": {
+            liquidDensity: 59.0,
+            vaporDensity: 1.65,
+            viscosityVapor: 2.60e-7,
+            viscosityLiquid: 3.20e-7,
+            dpdtLiquid: 2.5,
+            dpdtVapor: 2.1
+        },
+        "R404A": {
+            liquidDensity: 62.0,
+            vaporDensity: 2.30,
+            viscosityVapor: 2.90e-7,
+            viscosityLiquid: 3.80e-7,
+            dpdtLiquid: 2.2,
+            dpdtVapor: 1.7
+        },
+        "R407C": {
+            liquidDensity: 68.0,
+            vaporDensity: 1.40,
+            viscosityVapor: 2.65e-7,
+            viscosityLiquid: 3.70e-7,
+            dpdtLiquid: 1.8,
+            dpdtVapor: 1.4
+        }
+    };
+
+    function initFittingsTable() {
+        const tbody = document.getElementById("fittingsTableBody");
+        tbody.innerHTML = "";
+
+        for (const [key, item] of Object.entries(FITTING_DATABASE)) {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td>${item.name}</td>
+                <td><input type="number" id="qty_${key}" value="0" min="0" step="1" onchange="calculate()"></td>
+                <td id="eq_${key}">0.0</td>
+                <td id="sub_${key}">0.0</td>
+            `;
+            tbody.appendChild(tr);
+        }
+    }
+
+    function convertTemp(inputId, selectElem) {
+        const input = document.getElementById(inputId);
+        let val = parseFloat(input.value);
+        if (selectElem.value === "C") {
+            // Convert displayed from F to C
+            input.value = ((val - 32) * 5 / 9).toFixed(1);
+        } else {
+            // Convert displayed from C to F
+            input.value = ((val * 9 / 5) + 32).toFixed(1);
+        }
+        calculate();
+    }
+
+    function updateLineTypeDefaults() {
+        const lineType = document.getElementById("lineType").value;
+        const pipeSelect = document.getElementById("pipeSize");
+        
+        if (lineType === "liquid") {
+            pipeSelect.value = "0.625"; // 5/8" typical for small liquid line or 1-1/8"
+        } else if (lineType === "suction") {
+            pipeSelect.value = "1.125"; // 1-1/8"
+        } else {
+            pipeSelect.value = "0.875"; // 7/8"
+        }
+        calculate();
+    }
+
+    function switchTab(tabId) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        
+        event.target.classList.add('active');
+        document.getElementById(tabId).classList.add('active');
+    }
+
+    function calculate() {
+        const pipeSize = document.getElementById("pipeSize").value;
+        const pipeSizeNum = parseFloat(pipeSize);
+        
+        // Internal Diameter estimation (Type L Copper)
+        const tubeIDs = {
+            "0.375": 0.315,
+            "0.500": 0.430,
+            "0.625": 0.545,
+            "0.750": 0.666,
+            "0.875": 0.785,
+            "1.125": 1.025,
+            "1.375": 1.265,
+            "1.625": 1.505,
+            "2.125": 1.985,
+            "2.625": 2.465
+        };
+        const idInches = tubeIDs[pipeSize] || (pipeSizeNum * 0.9);
+        const idFeet = idInches / 12.0;
+        const areaSqFt = Math.PI * Math.pow(idFeet / 2, 2);
+
+        // 1. Calculate Equivalent Length of Fittings
+        let totalFittingsEqLength = 0;
+        for (const [key, item] of Object.entries(FITTING_DATABASE)) {
+            const qty = parseInt(document.getElementById(`qty_${key}`).value) || 0;
+            const unitEq = item.values[pipeSize] || 1.0;
+            const subtotal = qty * unitEq;
+            
+            document.getElementById(`eq_${key}`).innerText = unitEq.toFixed(1);
+            document.getElementById(`sub_${key}`).innerText = subtotal.toFixed(1);
+            
+            totalFittingsEqLength += subtotal;
+        }
+
+        // Actual Length
+        let actualLen = parseFloat(document.getElementById("actualLength").value) || 0;
+        if (document.getElementById("unitLength").value === "m") {
+            actualLen = actualLen * 3.28084; // Convert m to ft for calculation
+        }
+
+        const totalEqLengthFeet = actualLen + totalFittingsEqLength;
+        const totalEqLengthMeters = totalEqLengthFeet / 3.28084;
+
+        document.getElementById("resEqLength").innerText = `${totalEqLengthFeet.toFixed(1)} ft`;
+        document.getElementById("resEqLengthAlt").innerText = `(${totalEqLengthMeters.toFixed(2)} m)`;
+
+        // 2. Capacity Normalization
+        let capTons = parseFloat(document.getElementById("capacity").value) || 0;
+        const capUnit = document.getElementById("unitCapacity").value;
+        if (capUnit === "kW") capTons = capTons / 3.517;
+        if (capUnit === "BTU") capTons = capTons / 12000;
+
+        // 3. Fluid Flow Physics Calculations
+        const refName = document.getElementById("refrigerant").value;
+        const lineType = document.getElementById("lineType").value;
+        const refData = REFRIGERANT_DATA[refName] || REFRIGERANT_DATA["R454B"];
+
+        // Mass flow rate estimation (approx 2.8 - 3.2 lb/min per ton depending on refrigerant)
+        const massFlowLbmMin = capTons * 3.0; 
+        const massFlowLbmSec = massFlowLbmMin / 60.0;
+
+        let density = (lineType === "liquid") ? refData.liquidDensity : refData.vaporDensity;
+        let viscosity = (lineType === "liquid") ? refData.viscosityLiquid : refData.viscosityVapor;
+
+        // Velocity = MassFlow / (Density * Area)
+        const velocityFps = massFlowLbmSec / (density * areaSqFt);
+        const velocityFpm = velocityFps * 60.0;
+        const velocityMs = velocityFps * 0.3048;
+
+        document.getElementById("resVelocity").innerText = `${Math.round(velocityFpm)} fpm`;
+        document.getElementById("resVelocityAlt").innerText = `(${velocityMs.toFixed(2)} m/s)`;
+
+        // Reynolds Number Re = (Density * Velocity * ID) / Viscosity
+        const reynolds = (density * velocityFps * idFeet) / (viscosity * 32.174); 
+        document.getElementById("resReynolds").innerText = Math.round(reynolds).toLocaleString();
+        document.getElementById("resFlowRegime").innerText = reynolds > 4000 ? "Turbulent Flow" : (reynolds < 2000 ? "Laminar Flow" : "Transitional Flow");
+
+        // Darcy-Weisbach Friction Factor approximation (Churchill equation)
+        const relativeRoughness = 0.000005 / idFeet; // Copper roughness ~0.0015 mm
+        let f = 0.02; // baseline friction factor
+        if (reynolds > 2000) {
+            f = 0.25 / Math.pow(Math.log10(relativeRoughness / 3.7 + 5.74 / Math.pow(reynolds, 0.9)), 2);
+        }
+
+        // Delta P (psi) = f * (L/D) * (Density * V^2 / 2)
+        const pressureDropLbfSqFt = f * (totalEqLengthFeet / idFeet) * (density * Math.pow(velocityFps, 2) / (2 * 32.174));
+        const deltaPsi = pressureDropLbfSqFt / 144.0;
+        const deltaBar = deltaPsi * 0.0689476;
+
+        // Temperature Drop equivalent
+        const dpdt = (lineType === "liquid") ? refData.dpdtLiquid : refData.dpdtVapor;
+        const deltaTempF = deltaPsi / dpdt;
+        const deltaTempC = deltaTempF * (5/9);
+
+        document.getElementById("resDeltaP").innerText = `${deltaPsi.toFixed(2)} psi`;
+        document.getElementById("resDeltaPAlt").innerText = `(${deltaBar.toFixed(2)} bar / ${deltaTempF.toFixed(1)} °F equiv drop)`;
+
+        // 4. Engineering Guidance Logic
+        evaluateEngineeringGuidance(lineType, velocityFpm, deltaTempF, deltaPsi);
+    }
+
+    function evaluateEngineeringGuidance(lineType, velocityFpm, deltaTempF, deltaPsi) {
+        const velStatus = document.getElementById("velocityStatus");
+        const velText = document.getElementById("velocityGuidelineText");
+        const dropStatus = document.getElementById("dropStatus");
+        const dropText = document.getElementById("dropGuidelineText");
+
+        // Velocity Rules
+        if (lineType === "liquid") {
+            if (velocityFpm > 300) {
+                velStatus.className = "status-badge status-danger";
+                velStatus.innerText = "HIGH VELOCITY WARNING (> 300 fpm)";
+                velText.innerHTML = `<strong>Reason:</strong> Liquid velocity of ${Math.round(velocityFpm)} fpm exceeds the recommended standard limit of 300 fpm.<br><strong>Risk:</strong> High potential for severe liquid hammer noise and valve damage during solenoid closures. Increase pipe diameter.`;
+            } else {
+                velStatus.className = "status-badge status-good";
+                velStatus.innerText = "ACCEPTABLE VELOCITY (< 300 fpm)";
+                velText.innerHTML = `Liquid line velocity is ${Math.round(velocityFpm)} fpm, within safe parameters to prevent hydraulic shock / liquid hammer.`;
+            }
+        } else if (lineType === "suction") {
+            if (velocityFpm < 500) {
+                velStatus.className = "status-badge status-warning";
+                velStatus.innerText = "LOW VELOCITY WARNING (< 500 fpm)";
+                velText.innerHTML = `<strong>Reason:</strong> Suction velocity of ${Math.round(velocityFpm)} fpm is below the 500-750 fpm minimum requirement for horizontal lines.<br><strong>Risk:</strong> Refrigerant oil will trap in line and not return to compressor sump, leading to compressor lubrication failure. Reduce pipe size.`;
+            } else if (velocityFpm > 4000) {
+                velStatus.className = "status-badge status-danger";
+                velStatus.innerText = "HIGH VELOCITY WARNING (> 4000 fpm)";
+                velText.innerHTML = `<strong>Reason:</strong> Vapor velocity exceeds 4000 fpm.<br><strong>Risk:</strong> Excessive noise, line vibration, and high friction loss. Increase pipe size.`;
+            } else {
+                velStatus.className = "status-badge status-good";
+                velStatus.innerText = "OPTIMAL VELOCITY (500 - 4000 fpm)";
+                velText.innerHTML = `Suction gas velocity of ${Math.round(velocityFpm)} fpm ensures proper oil return while keeping noise levels minimal.`;
+            }
+        } else { // Discharge
+            if (velocityFpm < 500) {
+                velStatus.className = "status-badge status-warning";
+                velStatus.innerText = "LOW VELOCITY WARNING (< 500 fpm)";
+                velText.innerHTML = `<strong>Reason:</strong> Hot gas velocity is below minimum oil entrainment threshold. Oil logging may occur in discharge lines.`;
+            } else if (velocityFpm > 3500) {
+                velStatus.className = "status-badge status-danger";
+                velStatus.innerText = "HIGH VELOCITY WARNING (> 3500 fpm)";
+                velText.innerHTML = `<strong>Reason:</strong> Hot gas velocity exceeds 3500 fpm.<br><strong>Risk:</strong> Excessive acoustic noise and piping vibration.`;
+            } else {
+                velStatus.className = "status-badge status-good";
+                velStatus.innerText = "OPTIMAL VELOCITY";
+                velText.innerHTML = `Discharge line velocity of ${Math.round(velocityFpm)} fpm is within normal design guidelines.`;
+            }
+        }
+
+        // Pressure Drop Rules
+        if (deltaTempF > 2.0) {
+            dropStatus.className = "status-badge status-danger";
+            dropStatus.innerText = "EXCESSIVE ΔP (> 2.0 °F Drop Equivalent)";
+            dropText.innerHTML = `<strong>Reason:</strong> Calculated pressure drop equals a ${deltaTempF.toFixed(1)} °F saturation temperature penalty.<br><strong>Impact:</strong> Exceeds the recommended ASHRAE 2.0 °F limit. Reduces system cooling capacity and decreases compressor energy efficiency (EER/COP).`;
+        } else if (deltaTempF > 1.5) {
+            dropStatus.className = "status-badge status-warning";
+            dropStatus.innerText = "MARGINAL ΔP (1.5 - 2.0 °F Drop)";
+            dropText.innerHTML = `Pressure drop equals ${deltaTempF.toFixed(1)} °F saturation drop. Acceptable but near maximum limits.`;
+        } else {
+            dropStatus.className = "status-badge status-good";
+            dropStatus.innerText = "OPTIMAL ΔP (< 1.5 °F Drop)";
+            dropText.innerHTML = `Pressure drop is within optimal range (${deltaTempF.toFixed(1)} °F equivalent drop), minimizing efficiency loss.`;
+        }
+    }
+
+    // Initialize application
+    window.onload = function() {
+        initFittingsTable();
+        calculate();
+    };
+</script>
+
+</body>
+</html>
