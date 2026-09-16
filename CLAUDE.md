@@ -1,20 +1,52 @@
 # HVAC Calculator
 
-A refrigeration piping design and line sizing calculator. Engineering decision-support
-tool, not a novelty calculator.
+A refrigeration and HVAC engineering decision-support platform. Not a novelty
+calculator.
 
 Domain owner: Sanjeev (refrigeration engineer). He supplies the engineering
 requirements, source data, and verification. Sandeep builds it.
 
-## What this is
+## The product goal
 
-The target is a tool comparable to Sporlan Virtual Engineer, with one capability
-Sporlan does not offer: a flexible **actual equivalent-length calculator** where the
-engineer builds their real piping run — straight sections, rises, drops, every fitting
-and valve — and gets a traceable total.
+Sanjeev today opens a dozen browser tabs to look up values, fills an Excel sheet
+component by component, builds a summary, checks whether the numbers make sense,
+and loops back to change inputs. **That loop is what this tool replaces.**
 
-Full requirements are in `sources/line-sizing/scope-of-work.docx` (20 sections).
-Read it before proposing scope. It describes the finished product, not Phase 1.
+Three consequences, and they outrank everything else in this file:
+
+1. **One page, and it supplies the values.** The engineer selects; they do not
+   guess and they do not go hunting. Before adding a field that asks someone to
+   type a number, ask whether the app could know it instead — from the standards
+   database, from the location, or from an external API.
+2. **Iteration speed is the product.** Not any single calculation. Favour one
+   persistent project model with live recalculation over one-shot calculators.
+3. **"Do these values make sense?" is the whole point.** The PASS / WARNING / FAIL
+   engine is what closes his loop, so it outranks polish elsewhere.
+
+## Two modules, one product
+
+There are **two** scope documents from Sanjeev. Both are in scope.
+
+| Module | Scope doc | Status |
+|---|---|---|
+| Refrigerant line sizing & equivalent length | `sources/line-sizing/scope-of-work.docx` (20 sections) | Phase 1 built |
+| Entering air DB/WB condition selection | `sources/entering-air/scope-of-work.docx` (46 sections) | Next |
+
+They share the units layer, the provenance schema, the transparency pattern and
+the three-state status engine. Build them as modules of one app, not two apps.
+
+Read the relevant scope doc before proposing scope. Each describes a finished
+product, not a phase.
+
+**Line sizing** targets something comparable to Sporlan Virtual Engineer, with one
+capability Sporlan does not offer: a flexible **actual equivalent-length
+calculator** where the engineer builds their real piping run — straight sections,
+rises, drops, every fitting and valve — and gets a traceable total.
+
+**Entering air DB/WB** guides the engineer from product type through operating
+mode, location, climate and applicable standard to a sourced entering-air design
+condition — so that, in Sanjeev's words, *"the person using the application should
+not need to know the correct DB/WB values in advance."*
 
 ## Non-negotiable engineering principles
 
@@ -138,21 +170,35 @@ type Calculation<T> = {
 Data lives in `data/` as typed TypeScript, not JSON, so the source and verification
 fields are type-enforced.
 
-## Phase 1 scope
+## Build order
 
-Equivalent length calculator only. The piping configuration builder (scope doc
-section 16) with the fitting database behind it, full unit support, and calculation
-transparency. This is the differentiator and it is self-contained.
+**Done — line sizing, Phase 1.** Equivalent length calculator: the piping
+configuration builder (line-sizing scope §16) with the fitting database behind it,
+length unit support, and calculation transparency.
 
-Explicitly deferred:
+**Now — entering air DB/WB.** The guided selector, its relational standards
+database, per-field °F/°C/K units, DB/WB validation, and the psychrometric engine
+(RH, dew point, humidity ratio, enthalpy, specific volume, density). This is the
+module that most directly serves the product goal, because it *supplies* values
+the engineer would otherwise hunt for.
 
-- **PDF / Excel / CSV export** — held for the paywall, not free tier
-- CoolProp integration and real refrigerant properties
+**Next — closing the loop on line sizing.** Pressure drop, velocity, oil return,
+and the decision dashboard (line-sizing scope §11). Needs real refrigerant
+properties, so CoolProp or an equivalent comes with it.
+
+Deferred:
+
+- **PDF / Excel / CSV export** — held for the paywall, not free tier. Sanjeev's
+  own prototype has Word/PDF export; that does not change the business decision.
 - Auto pipe-size recommendation
-- Oil return and part-load analysis
-- Accounts, saved projects, backend
+- Accounts, saved projects, backend. Note the DB/WB scope asks for an override
+  audit trail with named users and revisions — that needs a backend, so it stays
+  out until the requirement is confirmed as a real review process.
 
-Do not build toward the deferred list. Build Phase 1 completely.
+Automatic retrieval of standard conditions from an external API (DB/WB scope
+"Method A") is not built. The internal database is "Method B", which that scope
+defines as the required fallback. Never trust an unverified web result as a
+standard value.
 
 ## Conventions
 

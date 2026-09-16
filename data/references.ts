@@ -43,6 +43,17 @@ export const REFERENCES: Record<string, Reference> = {
     locator: "Equivalent length of valves and fittings",
   },
 
+  "ashrae-fundamentals-psychrometrics": {
+    id: "ashrae-fundamentals-psychrometrics",
+    title: "ASHRAE Handbook — Fundamentals, Ch. 1 'Psychrometrics'",
+    edition: "2021",
+    sourceType: "standard",
+    locator:
+      "Eq. 5/6 (saturation pressure), Eq. 28 (specific volume), Eq. 30 (enthalpy), Eq. 33/34 (humidity ratio from wet-bulb), Eq. 37/38 (dew point)",
+    notes:
+      "Moist-air property correlations. These are established physical relationships rather than design guidance — the equations themselves are not in dispute, though the implementation is verified against ASHRAE's own published example states.",
+  },
+
   "engineering-practice": {
     id: "engineering-practice",
     title: "General refrigeration piping engineering practice",

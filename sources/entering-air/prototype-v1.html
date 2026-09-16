@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Entering Air DB / WB Condition Selector</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#171F24;
+  --ink-soft:#4B565C;
+  --ink-faint:#7C878C;
+  --paper:#F4F5F1;
+  --panel:#FFFFFF;
+  --line:#D9DCD3;
+  --line-strong:#B7BBAF;
+  --teal:#0B6E68;
+  --teal-dark:#064A46;
+  --teal-tint:#E2F0EE;
+  --amber:#A8611E;
+  --amber-tint:#F6E9D9;
+  --blue:#2B5C8A;
+  --blue-tint:#E4EDF5;
+  --red:#A23B2E;
+  --red-tint:#F6E4E0;
+  --mono:'IBM Plex Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  --sans:'Public Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family:var(--sans);
+  background:var(--paper);
+  color:var(--ink);
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 24px 80px;}
+
+/* ---------- Header ---------- */
+.masthead{
+  display:flex;justify-content:space-between;align-items:flex-end;
+  gap:24px;border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:24px;
+}
+.masthead h1{
+  font-size:26px;font-weight:700;margin:0 0 4px;letter-spacing:-0.01em;
+}
+.masthead p{margin:0;color:var(--ink-soft);font-size:14px;max-width:560px;}
+.masthead .badge{
+  font-family:var(--mono);font-size:11px;color:var(--teal-dark);
+  background:var(--teal-tint);border:1px solid var(--teal);border-radius:3px;
+  padding:4px 8px;white-space:nowrap;
+}
+
+/* ---------- Layout ---------- */
+.layout{display:grid;grid-template-columns:280px 1fr;gap:24px;align-items:start;}
+@media (max-width:860px){.layout{grid-template-columns:1fr;}}
+
+/* ---------- Stepper nav ---------- */
+.stepper{position:sticky;top:16px;display:flex;flex-direction:column;gap:2px;}
+.step-nav{
+  display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid transparent;
+  border-radius:6px;cursor:pointer;background:none;text-align:left;font-family:var(--sans);
+}
+.step-nav .num{
+  width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line-strong);
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-family:var(--mono);
+  color:var(--ink-soft);flex-shrink:0;
+}
+.step-nav .label{font-size:13px;color:var(--ink-soft);font-weight:500;}
+.step-nav .val{font-size:11px;color:var(--ink-faint);display:block;font-family:var(--mono);margin-top:1px;}
+.step-nav.active{background:var(--panel);border-color:var(--line);}
+.step-nav.active .num{background:var(--ink);border-color:var(--ink);color:#fff;}
+.step-nav.active .label{color:var(--ink);}
+.step-nav.done .num{background:var(--teal);border-color:var(--teal);color:#fff;}
+.step-nav.done .num::after{content:"\2713";}
+.step-nav.done .num{font-size:0;}
+.step-nav.done .num::after{font-size:11px;}
+
+.readout-mini{
+  margin-top:18px;border:1px solid var(--line);border-radius:8px;background:var(--panel);
+  padding:14px;
+}
+.readout-mini h4{margin:0 0 8px;font-size:11px;text-transform:none;color:var(--ink-faint);font-weight:600;}
+.readout-mini .row{display:flex;justify-content:space-between;font-family:var(--mono);font-size:12px;padding:3px 0;color:var(--ink-soft);}
+.readout-mini .row b{color:var(--ink);font-weight:600;}
+
+/* ---------- Panels ---------- */
+.panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:8px;
+  padding:22px 24px;margin-bottom:18px;
+}
+.panel h2{font-size:16px;margin:0 0 4px;font-weight:600;}
+.panel .sub{font-size:13px;color:var(--ink-soft);margin:0 0 16px;}
+
+.group-title{font-size:11px;font-weight:600;color:var(--ink-faint);margin:18px 0 8px;}
+.group-title:first-child{margin-top:0;}
+
+.chip-grid{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{
+  border:1px solid var(--line-strong);background:var(--panel);border-radius:6px;
+  padding:8px 13px;font-size:13px;cursor:pointer;color:var(--ink);font-family:var(--sans);
+  transition:border-color .12s, background .12s;
+}
+.chip:hover{border-color:var(--teal);}
+.chip.sel{background:var(--ink);border-color:var(--ink);color:#fff;}
+
+select,input[type=text],input[type=number]{
+  font-family:var(--sans);font-size:14px;padding:9px 10px;border:1px solid var(--line-strong);
+  border-radius:6px;background:#fff;color:var(--ink);width:100%;
+}
+select:focus,input:focus{outline:2px solid var(--teal);outline-offset:1px;}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field label{font-size:12px;font-weight:600;color:var(--ink-soft);}
+.field-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+@media (max-width:640px){.field-row{grid-template-columns:1fr;}}
+
+.pill{
+  display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;
+  border-radius:3px;padding:3px 8px;font-weight:600;
+}
+.pill.standard{background:var(--teal-tint);color:var(--teal-dark);}
+.pill.override{background:var(--amber-tint);color:var(--amber);}
+.pill.alt{background:var(--blue-tint);color:var(--blue);}
+.pill.warn{background:var(--red-tint);color:var(--red);}
+
+.climate-note{
+  margin-top:14px;font-size:12px;color:var(--ink-soft);background:var(--paper);
+  border-left:3px solid var(--line-strong);padding:8px 12px;border-radius:0 4px 4px 0;
+}
+.climate-note.override{border-left-color:var(--amber);}
+
+.std-card{
+  border:1px solid var(--line);border-radius:6px;padding:12px 14px;margin-bottom:8px;
+  cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;
+}
+.std-card:hover{border-color:var(--teal);}
+.std-card.sel{border-color:var(--teal);background:var(--teal-tint);}
+.std-card .name{font-weight:600;font-size:13.5px;}
+.std-card .scope{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+
+.why{font-size:12.5px;color:var(--ink-soft);margin-top:10px;line-height:1.6;}
+.why b{color:var(--ink);}
+
+/* ---------- Results ---------- */
+.results{border:1.5px solid var(--ink);border-radius:8px;overflow:hidden;margin-top:8px;}
+.results-head{
+  background:var(--ink);color:#fff;padding:12px 18px;display:flex;justify-content:space-between;
+  align-items:center;flex-wrap:wrap;gap:8px;
+}
+.results-head h3{margin:0;font-size:14px;font-weight:600;}
+.results-head .src{font-family:var(--mono);font-size:11px;color:#B7CFCC;}
+table.cond{width:100%;border-collapse:collapse;background:#fff;}
+table.cond th{
+  text-align:left;font-size:11px;color:var(--ink-faint);font-weight:600;
+  padding:10px 16px;border-bottom:1px solid var(--line);background:var(--paper);
+}
+table.cond td{padding:11px 16px;border-bottom:1px solid var(--line);font-size:13.5px;}
+table.cond td.stream{font-weight:600;}
+table.cond td.num{font-family:var(--mono);font-size:13px;}
+table.cond tr:last-child td{border-bottom:none;}
+.est{color:var(--amber);}
+.est::after{content:" *";}
+.foot-note{padding:10px 16px;font-size:11.5px;color:var(--ink-soft);background:var(--paper);border-top:1px solid var(--line);}
+
+.override-toggle{
+  display:flex;align-items:center;gap:8px;margin-top:16px;font-size:13px;color:var(--ink-soft);cursor:pointer;
+  user-select:none;
+}
+.override-toggle input{width:15px;height:15px;}
+.override-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px;}
+@media (max-width:640px){.override-grid{grid-template-columns:1fr 1fr;}}
+
+.compare{margin-top:14px;}
+.compare table{width:100%;border-collapse:collapse;font-size:13px;}
+.compare th{text-align:left;font-size:11px;color:var(--ink-faint);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);}
+.compare td{padding:8px 10px;border-bottom:1px solid var(--line);font-family:var(--mono);}
+.compare td.status{font-family:var(--sans);}
+
+.legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:20px;font-size:11.5px;color:var(--ink-soft);}
+.legend span{display:inline-flex;align-items:center;gap:5px;}
+.dot{width:8px;height:8px;border-radius:50%;display:inline-block;}
+
+.nav-btns{display:flex;justify-content:space-between;margin-top:18px;}
+button.step-btn{
+  font-family:var(--sans);font-size:13px;font-weight:600;padding:9px 16px;border-radius:6px;
+  border:1px solid var(--ink);background:var(--ink);color:#fff;cursor:pointer;
+}
+button.step-btn.ghost{background:none;color:var(--ink);}
+button.step-btn:disabled{opacity:.35;cursor:default;}
+
+.hint{font-size:12px;color:var(--ink-faint);margin-top:4px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div>
+      <h1>Entering air DB / WB condition selector</h1>
+      <p>Determine the correct entering air dry-bulb and wet-bulb design condition for HVAC, heat pump and refrigeration equipment — by product, mode, location, climate and rating standard.</p>
+    </div>
+    <span class="badge">PHASE 1 · REFERENCE TOOL</span>
+  </div>
+
+  <div class="layout">
+    <div class="stepper" id="stepper"></div>
+
+    <div id="panels"></div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   DATA
+   ============================================================ */
+
+// ---- Product categories & equipment types ----
+const PRODUCT_CATEGORIES = {
+  "Air Conditioning": ["DX Air Handling Unit","Packaged Air Conditioner","Rooftop Unit","Ducted Split System","Non-Ducted Split System","Chiller (Air-Cooled)","Other / Custom Unit"],
+  "Refrigeration": ["Walk-In Cooler","Walk-In Freezer","Refrigerated Room","Display Case (Medium Temp)","Display Case (Low Temp)","Condensing Unit","Process Refrigeration","Other / Custom Unit"],
+  "Heat Pump": ["Air-Source Heat Pump","Ducted Heat Pump","Packaged Heat Pump","Process Heat Pump","Other / Custom Unit"]
+};
+
+// ---- Climates ----
+const CLIMATES = ["Cold","Cool","Moderate","Warm","Hot","Hot-Dry","Hot-Humid","Tropical"];
+
+// ---- Countries -> region group (drives which standard is "recommended") + representative zones/climates ----
+// regionGroup: NA | Europe | Intl  (used to rank the recommended standard)
+const COUNTRIES = [
+  {name:"Canada", regionGroup:"NA", zones:[{n:"Ontario",c:"Cool"},{n:"Alberta",c:"Cold"},{n:"British Columbia",c:"Cool"},{n:"Quebec",c:"Cold"},{n:"Manitoba / Prairies",c:"Cold"},{n:"Nunavut / Arctic",c:"Cold"}]},
+  {name:"United States", regionGroup:"NA", zones:[{n:"Texas / Gulf Coast",c:"Hot-Humid"},{n:"Florida",c:"Hot-Humid"},{n:"Arizona / Nevada",c:"Hot-Dry"},{n:"California (coastal)",c:"Moderate"},{n:"New York / Northeast",c:"Moderate"},{n:"Minnesota / Upper Midwest",c:"Cold"},{n:"Pacific Northwest",c:"Cool"}]},
+  {name:"Mexico", regionGroup:"NA", zones:[{n:"Mexico City (highlands)",c:"Warm"},{n:"Yucatan",c:"Hot-Humid"},{n:"Sonora / North",c:"Hot-Dry"}]},
+  {name:"United Kingdom", regionGroup:"Europe", zones:[{n:"England",c:"Cool"},{n:"Scotland",c:"Cold"}]},
+  {name:"Germany", regionGroup:"Europe", zones:[{n:"National",c:"Moderate"}]},
+  {name:"France", regionGroup:"Europe", zones:[{n:"North",c:"Moderate"},{n:"South (Mediterranean)",c:"Warm"}]},
+  {name:"Spain", regionGroup:"Europe", zones:[{n:"North",c:"Moderate"},{n:"South (Andalusia)",c:"Hot-Dry"}]},
+  {name:"Italy", regionGroup:"Europe", zones:[{n:"North",c:"Moderate"},{n:"South",c:"Warm"}]},
+  {name:"Netherlands", regionGroup:"Europe", zones:[{n:"National",c:"Cool"}]},
+  {name:"Sweden / Norway / Finland", regionGroup:"Europe", zones:[{n:"National",c:"Cold"}]},
+  {name:"Poland", regionGroup:"Europe", zones:[{n:"National",c:"Cold"}]},
+  {name:"India", regionGroup:"Intl", zones:[{n:"Delhi / North Plains",c:"Hot-Dry"},{n:"Mumbai / West Coast",c:"Hot-Humid"},{n:"Bangalore / Deccan Plateau",c:"Moderate"},{n:"Rajasthan",c:"Hot-Dry"},{n:"Kerala / South Coast",c:"Tropical"}]},
+  {name:"China", regionGroup:"Intl", zones:[{n:"Beijing / North",c:"Cold"},{n:"Shanghai / East Coast",c:"Hot-Humid"},{n:"Guangzhou / South",c:"Tropical"},{n:"Harbin / Northeast",c:"Cold"}]},
+  {name:"Japan", regionGroup:"Intl", zones:[{n:"Tokyo",c:"Warm"},{n:"Hokkaido",c:"Cold"}]},
+  {name:"South Korea", regionGroup:"Intl", zones:[{n:"National",c:"Cold"}]},
+  {name:"Singapore", regionGroup:"Intl", zones:[{n:"National",c:"Tropical"}]},
+  {name:"Thailand", regionGroup:"Intl", zones:[{n:"National",c:"Hot-Humid"}]},
+  {name:"Indonesia", regionGroup:"Intl", zones:[{n:"National",c:"Tropical"}]},
+  {name:"Vietnam", regionGroup:"Intl", zones:[{n:"National",c:"Hot-Humid"}]},
+  {name:"United Arab Emirates", regionGroup:"Intl", zones:[{n:"National",c:"Hot-Dry"}]},
+  {name:"Saudi Arabia", regionGroup:"Intl", zones:[{n:"National",c:"Hot-Dry"}]},
+  {name:"Qatar", regionGroup:"Intl", zones:[{n:"National",c:"Hot-Dry"}]},
+  {name:"Egypt", regionGroup:"Intl", zones:[{n:"National",c:"Hot-Dry"}]},
+  {name:"Nigeria", regionGroup:"Intl", zones:[{n:"National",c:"Hot-Humid"}]},
+  {name:"South Africa", regionGroup:"Intl", zones:[{n:"Highveld",c:"Moderate"},{n:"Coastal",c:"Warm"}]},
+  {name:"Kenya", regionGroup:"Intl", zones:[{n:"Highlands",c:"Moderate"},{n:"Coast",c:"Tropical"}]},
+  {name:"Australia", regionGroup:"Intl", zones:[{n:"Darwin / North",c:"Tropical"},{n:"Alice Springs / Outback",c:"Hot-Dry"},{n:"Sydney",c:"Moderate"},{n:"Melbourne",c:"Cool"},{n:"Perth",c:"Warm"}]},
+  {name:"New Zealand", regionGroup:"Intl", zones:[{n:"National",c:"Cool"}]},
+  {name:"Brazil", regionGroup:"Intl", zones:[{n:"Amazon / North",c:"Tropical"},{n:"Sao Paulo",c:"Moderate"},{n:"Rio de Janeiro",c:"Hot-Humid"}]},
+  {name:"Argentina", regionGroup:"Intl", zones:[{n:"National",c:"Moderate"}]},
+  {name:"Chile", regionGroup:"Intl", zones:[{n:"National",c:"Cool"}]},
+  {name:"Russia", regionGroup:"Europe", zones:[{n:"European Russia",c:"Cold"}]},
+  {name:"Other — usually Cold climate", regionGroup:"Intl", zones:[{n:"General",c:"Cold"}]},
+  {name:"Other — usually Cool climate", regionGroup:"Intl", zones:[{n:"General",c:"Cool"}]},
+  {name:"Other — usually Moderate climate", regionGroup:"Intl", zones:[{n:"General",c:"Moderate"}]},
+  {name:"Other — usually Warm climate", regionGroup:"Intl", zones:[{n:"General",c:"Warm"}]},
+  {name:"Other — usually Hot & Dry climate", regionGroup:"Intl", zones:[{n:"General",c:"Hot-Dry"}]},
+  {name:"Other — usually Hot & Humid climate", regionGroup:"Intl", zones:[{n:"General",c:"Hot-Humid"}]},
+  {name:"Other — usually Tropical climate", regionGroup:"Intl", zones:[{n:"General",c:"Tropical"}]}
+];
+
+// ---- helper to build a condition object ----
+function C(dbF,dbC,wbF,wbC,estWB){
+  const o={dbF,dbC};
+  if(wbF===null){o.wbF=null;o.wbC=null;if(estWB){o.wbF=estWB[0];o.wbC=estWB[1];o.estimated=true;}}
+  else{o.wbF=wbF;o.wbC=wbC;}
+  return o;
+}
+
+// ---- Standards / rating condition database ----
+// category: Air Conditioning | Refrigeration | Heat Pump  (matches PRODUCT_CATEGORIES key)
+// equip: array of applicable equipment names, or "All"
+// region: NA | Europe | Intl | General  (which regionGroup this standard is "home" to)
+// climates: array of CLIMATES this record is the recommended match for
+const RATING_DB = [
+  // ---- AHRI 340/360 (North America, commercial) ----
+  {id:"AHRI340-1",category:"Air Conditioning",equip:["DX Air Handling Unit","Packaged Air Conditioner","Rooftop Unit","Ducted Split System","Chiller (Air-Cooled)"],mode:"Cooling",region:"NA",climates:["Moderate"],standard:"AHRI 340/360",edition:"2022",test:"Standard Cooling Rating",indoor:C(80,26.7,67,19.4),outdoor:C(95,35.0,75,23.9),notes:"Standard commercial air-cooled cooling rating point."},
+  {id:"AHRI340-2",category:"Air Conditioning",equip:["DX Air Handling Unit","Packaged Air Conditioner","Rooftop Unit","Ducted Split System","Chiller (Air-Cooled)"],mode:"Cooling",region:"NA",climates:["Cool"],standard:"AHRI 340/360",edition:"2022",test:"Low Ambient Cooling",indoor:C(67,19.4,57,13.9),outdoor:C(67,19.4,57,13.9),notes:"Low-ambient operating verification test, not a capacity rating point."},
+  {id:"AHRI340-3",category:"Air Conditioning",equip:["DX Air Handling Unit","Packaged Air Conditioner","Rooftop Unit","Ducted Split System","Chiller (Air-Cooled)"],mode:"Cooling",region:"NA",climates:["Hot","Hot-Dry"],standard:"AHRI 340/360",edition:"2022",test:"Maximum Cooling (Operating Limit)",indoor:C(80,26.7,67,19.4),outdoor:C(115,46.1,null,null,[66,18.9]),notes:"Operating limit test — standard specifies outdoor DB only. Outdoor WB marked * is an engineering estimate (typical coincident WB for hot-dry ambient) — verify with project weather data, not a published standard value."},
+  {id:"AHRI340-4",category:"Heat Pump",equip:["Air-Source Heat Pump","Ducted Heat Pump","Packaged Heat Pump"],mode:"Heating",region:"NA",climates:["Warm"],standard:"AHRI 340/360",edition:"2022",test:"High Temperature Heating",indoor:C(70,21.1,60,15.6),outdoor:C(47,8.3,43,6.1),notes:"Heating capacity/COP rating point."},
+  {id:"AHRI340-5",category:"Heat Pump",equip:["Air-Source Heat Pump","Ducted Heat Pump","Packaged Heat Pump"],mode:"Heating",region:"NA",climates:["Cold"],standard:"AHRI 340/360",edition:"2022",test:"Low Temperature Heating",indoor:C(70,21.1,60,15.6),outdoor:C(17,-8.3,15,-9.4),notes:"Cold-climate heating rating point."},
+
+  // ---- AHRI International (T1-T3 / H1-H3) ----
+  {id:"AHRIINTL-1",category:"Air Conditioning",equip:["DX Air Handling Unit","Packaged Air Conditioner","Ducted Split System","Non-Ducted Split System"],mode:"Cooling",region:"Intl",climates:["Moderate"],standard:"AHRI International",edition:"—",test:"T1",indoor:C(80.6,27.0,66.2,19.0),outdoor:C(95.0,35.0,75.2,24.0),notes:"Moderate-climate cooling rating."},
+  {id:"AHRIINTL-2",category:"Air Conditioning",equip:["DX Air Handling Unit","Packaged Air Conditioner","Ducted Split System","Non-Ducted Split System"],mode:"Cooling",region:"Intl",climates:["Cool"],standard:"AHRI International",edition:"—",test:"T2",indoor:C(69.8,21.0,59.0,15.0),outdoor:C(80.6,27.0,66.2,19.0),notes:"Cool-climate cooling rating."},
+  {id:"AHRIINTL-3",category:"Air Conditioning",equip:["DX Air Handling Unit","Packaged Air Conditioner","Ducted Split System","Non-Ducted Split System"],mode:"Cooling",region:"Intl",climates:["Hot","Hot-Humid","Tropical"],standard:"AHRI International",edition:"—",test:"T3",indoor:C(84.2,29.0,66.2,19.0),outdoor:C(114.8,46.0,75.2,24.0),notes:"Hot / tropical climate cooling rating."},
+  {id:"AHRIINTL-4",category:"Heat Pump",equip:["Air-Source Heat Pump","Ducted Heat Pump","Packaged Heat Pump"],mode:"Heating",region:"Intl",climates:["Warm"],standard:"AHRI International",edition:"—",test:"H1",indoor:C(68.0,20.0,59.0,15.0),outdoor:C(44.6,7.0,42.8,6.0),notes:"Warm-climate heating rating."},
+  {id:"AHRIINTL-5",category:"Heat Pump",equip:["Air-Source Heat Pump","Ducted Heat Pump","Packaged Heat Pump"],mode:"Heating",region:"Intl",climates:["Moderate"],standard:"AHRI International",edition:"—",test:"H2",indoor:C(68.0,20.0,59.0,15.0),outdoor:C(35.6,2.0,33.8,1.0),notes:"Moderate-climate heating rating."},
+  {id:"AHRIINTL-6",category:"Heat Pump",equip:["Air-Source Heat Pump","Ducted Heat Pump","Packaged Heat Pump"],mode:"Heating",region:"Intl",climates:["Cold"],standard:"AHRI International",edition:"—",test:"H3",indoor:C(68.0,20.0,59.0,15.0),outdoor:C(19.4,-7.0,17.6,-8.0),notes:"Cold-climate heating rating."},
+
+  // ---- ISO 5151 (non-ducted, residential) ----
+  {id:"ISO5151-1",category:"Air Conditioning",equip:["Non-Ducted Split System"],mode:"Cooling",region:"Intl",climates:["Moderate"],standard:"ISO 5151",edition:"2017",test:"T1",indoor:C(80.6,27.0,66.2,19.0),outdoor:C(95.0,35.0,75.2,24.0),notes:"Non-ducted unit, moderate climate."},
+  {id:"ISO5151-2",category:"Air Conditioning",equip:["Non-Ducted Split System"],mode:"Cooling",region:"Intl",climates:["Cool"],standard:"ISO 5151",edition:"2017",test:"T2",indoor:C(69.8,21.0,59.0,15.0),outdoor:C(80.6,27.0,66.2,19.0),notes:"Non-ducted unit, cool climate."},
+  {id:"ISO5151-3",category:"Air Conditioning",equip:["Non-Ducted Split System"],mode:"Cooling",region:"Intl",climates:["Tropical","Hot-Humid"],standard:"ISO 5151",edition:"2017",test:"T3",indoor:C(84.2,29.0,66.2,19.0),outdoor:C(114.8,46.0,75.2,24.0),notes:"Non-ducted unit, tropical climate."},
+  {id:"ISO5151-4",category:"Heat Pump",equip:["Air-Source Heat Pump"],mode:"Heating",region:"Intl",climates:["Warm"],standard:"ISO 5151",edition:"2017",test:"H1",indoor:C(68.0,20.0,59.0,15.0),outdoor:C(44.6,7.0,42.8,6.0),notes:"Non-ducted heat pump, warm climate."},
+  {id:"ISO5151-5",category:"Heat Pump",equip:["Air-Source Heat Pump"],mode:"Heating",region:"Intl",climates:["Moderate"],standard:"ISO 5151",edition:"2017",test:"H2",indoor:C(68.0,20.0,59.0,15.0),outdoor:C(35.6,2.0,33.8,1.0),notes:"Non-ducted heat pump, moderate climate."},
+  {id:"ISO5151-6",category:"Heat Pump",equip:["Air-Source Heat Pump"],mode:"Heating",region:"Intl",climates:["Cold"],standard:"ISO 5151",edition:"2017",test:"H3",indoor:C(68.0,20.0,59.0,15.0),outdoor:C(19.4,-7.0,17.6,-8.0),notes:"Non-ducted heat pump, cold climate."},
+
+  // ---- ISO 13253 (ducted) ----
+  {id:"ISO13253-1",category:"Air Conditioning",equip:["Ducted Split System","Rooftop Unit"],mode:"Cooling",region:"Intl",climates:["Moderate"],standard:"ISO 13253",edition:"2017",test:"Standard Cooling",indoor:C(80.6,27.0,66.2,19.0),outdoor:C(95.0,35.0,75.2,24.0),notes:"Ducted unit, standard cooling."},
+  {id:"ISO13253-2",category:"Air Conditioning",equip:["Ducted Split System","Rooftop Unit"],mode:"Cooling",region:"Intl",climates:["Hot","Hot-Humid","Tropical"],standard:"ISO 13253",edition:"2017",test:"Maximum Cooling",indoor:C(84.2,29.0,66.2,19.0),outdoor:C(114.8,46.0,75.2,24.0),notes:"Ducted unit, T3-equivalent."},
+  {id:"ISO13253-3",category:"Heat Pump",equip:["Ducted Heat Pump"],mode:"Heating",region:"Intl",climates:["Warm"],standard:"ISO 13253",edition:"2017",test:"Standard Heating",indoor:C(68.0,20.0,59.0,15.0),outdoor:C(44.6,7.0,42.8,6.0),notes:"Ducted heat pump, standard heating."},
+  {id:"ISO13253-4",category:"Heat Pump",equip:["Ducted Heat Pump"],mode:"Heating",region:"Intl",climates:["Cold"],standard:"ISO 13253",edition:"2017",test:"Low Temperature Heating",indoor:C(68.0,20.0,59.0,15.0),outdoor:C(19.4,-7.0,17.6,-8.0),notes:"Ducted heat pump, H3-equivalent."},
+
+  // ---- EN 14511 (Europe) ----
+  {id:"EN14511-1",category:"Air Conditioning",equip:["DX Air Handling Unit","Packaged Air Conditioner","Ducted Split System","Non-Ducted Split System"],mode:"Cooling",region:"Europe",climates:["Moderate","Warm"],standard:"EN 14511",edition:"2022",test:"A35",indoor:C(80.6,27.0,66.2,19.0),outdoor:C(95.0,35.0,75.2,24.0),notes:"EER rating point."},
+  {id:"EN14511-2",category:"Heat Pump",equip:["Air-Source Heat Pump","Ducted Heat Pump"],mode:"Heating",region:"Europe",climates:["Warm"],standard:"EN 14511",edition:"2022",test:"A7",indoor:C(68.0,20.0,59.0,15.0),outdoor:C(44.6,7.0,42.8,6.0),notes:"COP rating point."},
+  {id:"EN14511-3",category:"Heat Pump",equip:["Air-Source Heat Pump","Ducted Heat Pump"],mode:"Heating",region:"Europe",climates:["Moderate"],standard:"EN 14511",edition:"2022",test:"A2",indoor:C(68.0,20.0,59.0,15.0),outdoor:C(35.6,2.0,33.8,1.0),notes:"Winter rating point."},
+  {id:"EN14511-4",category:"Heat Pump",equip:["Air-Source Heat Pump","Ducted Heat Pump"],mode:"Heating",region:"Europe",climates:["Cold"],standard:"EN 14511",edition:"2022",test:"A-7",indoor:C(68.0,20.0,59.0,15.0),outdoor:C(19.4,-7.0,17.6,-8.0),notes:"Cold-climate rating point."},
+
+  // ---- Refrigeration — general industry reference (no single global standard supplied; flagged for verification) ----
+  {id:"REF-WIC",category:"Refrigeration",equip:["Walk-In Cooler","Refrigerated Room"],mode:"Cooling",region:"General",climates:["Moderate","Warm","Hot","Hot-Dry","Hot-Humid","Tropical","Cool","Cold"],standard:"Industry Reference (General)",edition:"—",test:"Medium-Temp Storage",indoor:C(35,1.7,null,null),outdoor:C(95,35.0,75,23.9),notes:"General reference only — no single global standard supplied. Room air DB is the typical medium-temperature storage set point; verify against AHRI 1200 / project spec. Condenser ambient uses the standard 95°F/35°C DB, 75°F/23.9°C WB outdoor design point."},
+  {id:"REF-WIF",category:"Refrigeration",equip:["Walk-In Freezer"],mode:"Cooling",region:"General",climates:["Moderate","Warm","Hot","Hot-Dry","Hot-Humid","Tropical","Cool","Cold"],standard:"Industry Reference (General)",edition:"—",test:"Low-Temp Storage",indoor:C(-10,-23.3,null,null),outdoor:C(95,35.0,75,23.9),notes:"General reference only. Room air DB is a typical low-temperature (freezer) set point; verify against AHRI 1200 / project spec."},
+  {id:"REF-DCM",category:"Refrigeration",equip:["Display Case (Medium Temp)"],mode:"Cooling",region:"General",climates:["Moderate","Warm","Hot","Hot-Dry","Hot-Humid","Tropical","Cool","Cold"],standard:"Industry Reference (General)",edition:"—",test:"ASHRAE 72 Class II (approx.)",indoor:C(38,3.3,null,null),outdoor:C(95,35.0,75,23.9),notes:"General reference. Ambient store air condition for open/glass-door medium-temp case entering air; verify against ASHRAE 72 test class and project spec."},
+  {id:"REF-DCL",category:"Refrigeration",equip:["Display Case (Low Temp)"],mode:"Cooling",region:"General",climates:["Moderate","Warm","Hot","Hot-Dry","Hot-Humid","Tropical","Cool","Cold"],standard:"Industry Reference (General)",edition:"—",test:"ASHRAE 72 Low-Temp (approx.)",indoor:C(0,-17.8,null,null),outdoor:C(95,35.0,75,23.9),notes:"General reference. Verify against ASHRAE 72 test class and project spec."},
+  {id:"REF-CU",category:"Refrigeration",equip:["Condensing Unit"],mode:"Cooling",region:"General",climates:["Moderate","Warm","Hot","Hot-Dry","Hot-Humid","Tropical","Cool","Cold"],standard:"Industry Reference (General)",edition:"—",test:"Standard Ambient Rating",indoor:C(null,null,null,null),outdoor:C(95,35.0,75,23.9),notes:"Condensing units are rated on outdoor ambient DB only (air-cooled condenser); no indoor entering-air condition applies. Verify against AHRI 1200 / manufacturer rating basis."},
+  {id:"REF-PROC",category:"Refrigeration",equip:["Process Refrigeration"],mode:"Cooling",region:"General",climates:["Moderate","Warm","Hot","Hot-Dry","Hot-Humid","Tropical","Cool","Cold"],standard:"Project-Specific — No Standard Condition",edition:"—",test:"Not standardized",indoor:C(null,null,null,null),outdoor:C(null,null,null,null),notes:"Process refrigeration entering-air conditions are process-dependent and not covered by a general rating standard. Define with the process/project engineer."},
+
+  // ---- Chiller — air-cooled condenser (DB governs; not WB-rated) ----
+  {id:"CHIL-1",category:"Air Conditioning",equip:["Chiller (Air-Cooled)"],mode:"Cooling",region:"General",climates:["Moderate","Warm","Hot","Hot-Dry","Hot-Humid","Tropical","Cool","Cold"],standard:"AHRI 550/590",edition:"2023",test:"Standard Rating (Condenser Entering Air)",indoor:C(null,null,null,null),outdoor:C(95,35.0,null,null),notes:"Air-cooled chiller condensers are rated on entering air DB only per AHRI 550/590 — no indoor air-side entering condition (the load side is chilled water, not air) and outdoor WB is not part of the rating basis."}
+];
+
+// ---- Rank helper: recommended vs alternative standard for a country's region group ----
+function regionRank(recordRegion, countryRegionGroup){
+  if(recordRegion==="General") return 1;
+  if(recordRegion===countryRegionGroup) return 0;
+  return 2;
+}
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const state = {
+  step:1,
+  category:null,
+  equipment:null,
+  mode:null,
+  country:null,
+  zoneClimate:null,
+  climate:null,
+  climateOverridden:false,
+  region:"",
+  city:"",
+  standardId:null,
+  standardOverridden:false,
+  testIds:{Cooling:null,Heating:null},
+  overrideOn:false,
+  project:{indoorDB:"",indoorWB:"",outdoorDB:"",outdoorWB:""}
+};
+
+const STEPS = [
+  {n:1,label:"Product type"},
+  {n:2,label:"Operating mode"},
+  {n:3,label:"Installation location"},
+  {n:4,label:"Climate"},
+  {n:5,label:"Applicable standard"},
+  {n:6,label:"Rating / test condition"}
+];
+
+function fmt(v,unit){
+  if(v===null||v===undefined) return "—";
+  return Math.round(v*10)/10 + unit;
+}
+
+function candidateRecords(){
+  return RATING_DB.filter(r=>{
+    if(r.category!==state.category) return false;
+    if(state.equipment && r.equip!=="All" && !r.equip.includes(state.equipment)) return false;
+    return true;
+  });
+}
+
+function recordsForModeClimate(mode){
+  return candidateRecords().filter(r=>r.mode===mode && r.climates.includes(state.climate));
+}
+
+function applicableStandardsList(mode){
+  const recs = recordsForModeClimate(mode);
+  const byStd = {};
+  recs.forEach(r=>{
+    if(!byStd[r.standard]) byStd[r.standard]=r;
+  });
+  const country = COUNTRIES.find(c=>c.name===state.country);
+  const grp = country?country.regionGroup:"Intl";
+  return Object.values(byStd).sort((a,b)=>regionRank(a.region,grp)-regionRank(b.region,grp));
+}
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function render(){
+  renderStepper();
+  renderPanels();
+}
+
+function renderStepper(){
+  const el = document.getElementById('stepper');
+  const country = COUNTRIES.find(c=>c.name===state.country);
+  el.innerHTML = STEPS.map(s=>{
+    const active = s.n===state.step;
+    const done = s.n<state.step;
+    let val = "";
+    if(s.n===1 && state.category) val = state.equipment||state.category;
+    if(s.n===2 && state.mode) val = state.mode;
+    if(s.n===3 && state.country) val = state.country;
+    if(s.n===4 && state.climate) val = state.climate + (state.climateOverridden?" (override)":"");
+    if(s.n===5 && state.standardId){const r=RATING_DB.find(x=>x.id===state.standardId);val=r?r.standard:"";}
+    if(s.n===6){const fm=state.mode==="Cooling & Heating"?"Cooling":state.mode; const tid=fm?state.testIds[fm]:null; if(tid){const r=RATING_DB.find(x=>x.id===tid);val=r?r.test:"";}}
+    return `<button class="step-nav ${active?'active':''} ${done?'done':''}" onclick="goStep(${s.n})">
+      <span class="num">${s.n}</span>
+      <span><span class="label">${s.label}</span>${val?`<span class="val">${val}</span>`:""}</span>
+    </button>`;
+  }).join("") + renderMiniReadout();
+}
+
+function renderMiniReadout(){
+  const firstMode = state.mode==="Cooling & Heating" ? "Cooling" : state.mode;
+  const tid = firstMode ? state.testIds[firstMode] : null;
+  if(!tid) return "";
+  const rec = RATING_DB.find(r=>r.id===tid);
+  if(!rec) return "";
+  return `<div class="readout-mini">
+    <h4>Current readout</h4>
+    <div class="row"><span>Standard</span><b>${rec.standard}</b></div>
+    <div class="row"><span>Condition</span><b>${rec.test}</b></div>
+    <div class="row"><span>Outdoor DB</span><b>${fmt(rec.outdoor.dbF,'°F')} / ${fmt(rec.outdoor.dbC,'°C')}</b></div>
+    <div class="row"><span>Outdoor WB</span><b>${fmt(rec.outdoor.wbF,'°F')} / ${fmt(rec.outdoor.wbC,'°C')}</b></div>
+  </div>`;
+}
+
+function goStep(n){
+  if(n>1 && !state.category) return;
+  if(n>2 && !state.mode) return;
+  if(n>3 && !state.country) return;
+  if(n>4 && !state.climate) return;
+  if(n>5 && !state.standardId) return;
+  state.step = n;
+  render();
+}
+
+function renderPanels(){
+  const el = document.getElementById('panels');
+  let html = "";
+  if(state.step===1) html = panelProduct();
+  if(state.step===2) html = panelMode();
+  if(state.step===3) html = panelLocation();
+  if(state.step===4) html = panelClimate();
+  if(state.step===5) html = panelStandard();
+  if(state.step===6) html = panelCondition();
+  el.innerHTML = html;
+}
+
+/* ---------- Step 1 ---------- */
+function panelProduct(){
+  let body = "";
+  Object.keys(PRODUCT_CATEGORIES).forEach(cat=>{
+    body += `<div class="group-title">${cat}</div><div class="chip-grid">`;
+    PRODUCT_CATEGORIES[cat].forEach(eq=>{
+      const sel = state.category===cat && state.equipment===eq;
+      body += `<button class="chip ${sel?'sel':''}" onclick="pickProduct('${cat.replace(/'/g,"\\'")}','${eq.replace(/'/g,"\\'")}')">${eq}</button>`;
+    });
+    body += `</div>`;
+  });
+  return `<div class="panel">
+    <h2>Step 1 — Product type</h2>
+    <p class="sub">Select the product or equipment type you are designing or selecting.</p>
+    ${body}
+    <div class="nav-btns"><span></span>${navNext(1)}</div>
+  </div>`;
+}
+function pickProduct(cat,eq){
+  state.category=cat; state.equipment=eq;
+  state.mode=null; state.standardId=null; state.testIds={Cooling:null,Heating:null};
+  render();
+}
+
+/* ---------- Step 2 ---------- */
+function panelMode(){
+  const modes = ["Cooling","Heating","Cooling & Heating"];
+  const body = modes.map(m=>`<button class="chip ${state.mode===m?'sel':''}" onclick="pickMode('${m}')">${m}</button>`).join("");
+  return `<div class="panel">
+    <h2>Step 2 — Operating mode</h2>
+    <p class="sub">A single DB/WB condition cannot represent both cooling and heating. Selecting "Cooling &amp; Heating" will display both design conditions separately.</p>
+    <div class="chip-grid">${body}</div>
+    <div class="nav-btns">${navBack(2)}${navNext(2)}</div>
+  </div>`;
+}
+function pickMode(m){ state.mode=m; state.standardId=null; state.testIds={Cooling:null,Heating:null}; render(); }
+
+/* ---------- Step 3 ---------- */
+function panelLocation(){
+  const opts = COUNTRIES.map(c=>`<option value="${c.name}" ${state.country===c.name?'selected':''}>${c.name}</option>`).join("");
+  const country = COUNTRIES.find(c=>c.name===state.country);
+  let zoneBody = "";
+  if(country){
+    zoneBody = `<div class="field"><label>Region / zone (typical climate shown — refine in the next step)</label>
+      <select onchange="pickZone(this.value)">
+        ${country.zones.map(z=>`<option value="${z.n}" ${state.zoneClimate&&state.zoneClimate.n===z.n?'selected':''}>${z.n} — ${z.c}</option>`).join("")}
+      </select></div>`;
+  }
+  return `<div class="panel">
+    <h2>Step 3 — Product installation location</h2>
+    <p class="sub">The physical location where the product/equipment will be installed or operated. Location guides the recommended climate and standard — you can still choose a different standard yourself in Step 5.</p>
+    <div class="field-row">
+      <div class="field"><label>Country</label><select onchange="pickCountry(this.value)"><option value="">Select a country…</option>${opts}</select></div>
+      <div class="field"><label>Province / state / region (optional)</label><input type="text" placeholder="e.g. Ontario" value="${state.region}" oninput="state.region=this.value"></div>
+      <div class="field"><label>City / location (optional)</label><input type="text" placeholder="e.g. Toronto" value="${state.city}" oninput="state.city=this.value"></div>
+    </div>
+    ${country?`<div style="margin-top:14px;">${zoneBody}</div>`:""}
+    <div class="nav-btns">${navBack(3)}${navNext(3)}</div>
+  </div>`;
+}
+function pickCountry(name){
+  state.country = name || null;
+  const country = COUNTRIES.find(c=>c.name===name);
+  state.zoneClimate = country ? country.zones[0] : null;
+  state.climate = state.zoneClimate ? state.zoneClimate.c : null;
+  state.climateOverridden = false;
+  state.standardId=null; state.testIds={Cooling:null,Heating:null};
+  render();
+}
+function pickZone(zn){
+  const country = COUNTRIES.find(c=>c.name===state.country);
+  const z = country.zones.find(x=>x.n===zn);
+  state.zoneClimate = z;
+  if(!state.climateOverridden){ state.climate = z.c; }
+  render();
+}
+
+/* ---------- Step 4 ---------- */
+function panelClimate(){
+  const body = CLIMATES.map(cl=>`<button class="chip ${state.climate===cl?'sel':''}" onclick="pickClimate('${cl}')">${cl}</button>`).join("");
+  const detected = state.zoneClimate ? state.zoneClimate.c : null;
+  return `<div class="panel">
+    <h2>Step 4 — Climate</h2>
+    <p class="sub">Detected / recommended from installation location: <b>${detected||"—"}</b>. Override if the project site differs.</p>
+    <div class="chip-grid">${body}</div>
+    ${state.climateOverridden?`<div class="climate-note override"><span class="pill override">USER OVERRIDE</span> Climate manually changed from the location-detected value (${detected}).</div>`:""}
+    <div class="nav-btns">${navBack(4)}${navNext(4)}</div>
+  </div>`;
+}
+function pickClimate(cl){
+  state.climate=cl;
+  state.climateOverridden = !(state.zoneClimate && state.zoneClimate.c===cl);
+  state.standardId=null; state.testIds={Cooling:null,Heating:null};
+  render();
+}
+
+/* ---------- Step 5 ---------- */
+function panelStandard(){
+  const modesToShow = state.mode==="Cooling & Heating" ? ["Cooling","Heating"] : [state.mode];
+  let combined = [];
+  modesToShow.forEach(m=>{ applicableStandardsList(m).forEach(r=>combined.push(r)); });
+  const seen = new Set(); const list = [];
+  combined.forEach(r=>{ if(!seen.has(r.standard)){seen.add(r.standard); list.push(r);} });
+
+  const country = COUNTRIES.find(c=>c.name===state.country);
+  const grp = country?country.regionGroup:"Intl";
+
+  const cards = list.map((r,i)=>{
+    const rank = regionRank(r.region,grp);
+    const tag = rank===0 ? `<span class="pill standard">RECOMMENDED</span>` : rank===1 ? `<span class="pill alt">REFERENCE</span>` : `<span class="pill alt">ALTERNATIVE</span>`;
+    const sel = state.standardId && RATING_DB.find(x=>x.id===state.standardId).standard===r.standard;
+    return `<div class="std-card ${sel?'sel':''}" onclick="pickStandard('${r.id}')">
+      <div><div class="name">${r.standard}</div><div class="scope">${r.notes}</div></div>
+      ${tag}
+    </div>`;
+  }).join("");
+
+  if(list.length===0){
+    return `<div class="panel"><h2>Step 5 — Applicable standard</h2><p class="sub">No matching rating standard was found for this combination of product, mode and climate. Try broadening the equipment type or climate selection.</p><div class="nav-btns">${navBack(5)}<span></span></div></div>`;
+  }
+
+  return `<div class="panel">
+    <h2>Step 5 — Applicable standard</h2>
+    <p class="sub">Recommended from product type + operating mode + installation location + climate. You may accept the recommendation or select a different standard.</p>
+    ${cards}
+    <div class="why"><b>Why this recommendation:</b> the ${grp==='NA'?'North American':grp==='Europe'?'European':'international'} installation location, together with the selected equipment type, operating mode and climate, was matched against the standard condition database. Standards from other markets remain selectable as alternatives.</div>
+    <div class="nav-btns">${navBack(5)}${navNext(5)}</div>
+  </div>`;
+}
+function pickStandard(id){
+  state.standardId = id;
+  state.testIds = {Cooling:null,Heating:null};
+  render();
+}
+
+/* ---------- Step 6 ---------- */
+function testsForCurrentStandard(mode){
+  const rec = RATING_DB.find(x=>x.id===state.standardId);
+  if(!rec) return [];
+  return candidateRecords().filter(r=>r.standard===rec.standard && r.mode===mode);
+}
+
+function panelCondition(){
+  const rec = RATING_DB.find(x=>x.id===state.standardId);
+  const modesToShow = (state.mode==="Cooling & Heating" ? ["Cooling","Heating"] : [state.mode]).filter(m=>testsForCurrentStandard(m).length>0);
+
+  let selectors = modesToShow.map(m=>{
+    const opts = testsForCurrentStandard(m);
+    const currentSel = opts.find(o=>o.id===state.testIds[m]) || opts.find(o=>o.climates.includes(state.climate)) || opts[0];
+    if(currentSel && !state.testIds[m]) state.testIds[m] = currentSel.id;
+    return `<div class="field"><label>${m} — rating / test condition</label>
+      <select onchange="pickTest('${m}',this.value)">
+        ${opts.map(o=>`<option value="${o.id}" ${state.testIds[m]===o.id?'selected':''}>${o.test}</option>`).join("")}
+      </select></div>`;
+  }).join("");
+
+  return `<div class="panel">
+    <h2>Step 6 — Rating / test condition</h2>
+    <p class="sub">Available conditions are filtered to the selected standard (${rec?rec.standard:'—'}), equipment and operating mode.</p>
+    <div class="field-row" style="grid-template-columns:1fr 1fr;">${selectors}</div>
+    <div class="nav-btns">${navBack(6)}<span></span></div>
+  </div>
+  ${renderResults(modesToShow)}`;
+}
+function pickTest(mode,id){ state.testIds[mode]=id; render(); }
+
+/* ---------- Results block ---------- */
+function renderResults(modesToShow){
+  let out = "";
+  modesToShow.forEach(m=>{
+    const opts = testsForCurrentStandard(m);
+    let rec = opts.find(o=>o.id===state.testIds[m]);
+    if(!rec) rec = opts.find(o=>o.climates.includes(state.climate)) || opts[0];
+    if(!rec) return;
+    out += resultCard(m,rec);
+  });
+  return out;
+}
+
+function resultCard(mode,rec){
+  const indoorLabel = rec.category==="Refrigeration" ? "Room / entering air" : "Indoor / entering air";
+  const outdoorLabel = rec.category==="Refrigeration" ? "Outdoor / condenser ambient" : "Outdoor / condenser air";
+  let rows = "";
+  rows += resultRow(indoorLabel, rec.indoor);
+  rows += resultRow(outdoorLabel, rec.outdoor);
+
+  let projectRows = "";
+  if(state.overrideOn){
+    projectRows = `<div class="compare"><table>
+      <tr><th>Parameter</th><th>Standard rating</th><th>Project design</th><th>Status</th></tr>
+      ${compareRow("Indoor DB",rec.indoor.dbF,state.project.indoorDB)}
+      ${compareRow("Indoor WB",rec.indoor.wbF,state.project.indoorWB)}
+      ${compareRow("Outdoor DB",rec.outdoor.dbF,state.project.outdoorDB)}
+      ${compareRow("Outdoor WB",rec.outdoor.wbF,state.project.outdoorWB)}
+    </table></div>`;
+  }
+
+  const estimateNote = (rec.outdoor.estimated || rec.indoor.estimated) ? `<div class="foot-note"><span class="pill warn">ESTIMATED</span> A value marked * is not published in the source standard for this operating limit — it is an engineering estimate to fill the gap and must be verified against project-specific weather data before use as a design value.</div>` : "";
+  const generalNote = rec.region==="General" ? `<div class="foot-note"><span class="pill alt">GENERAL REFERENCE</span> This equipment type is not covered by the supplied standard set — value shown is general industry practice, not a cited standard clause. Verify against the applicable equipment standard (e.g. AHRI 1200, ASHRAE 72) or project specification.</div>` : "";
+
+  return `<div class="results">
+    <div class="results-head">
+      <h3>${mode} design conditions</h3>
+      <span class="src">${rec.standard} · ${rec.test}${rec.edition&&rec.edition!=='—'?' · ed. '+rec.edition:''}</span>
+    </div>
+    <table class="cond">
+      <tr><th>Air stream</th><th>DB (°F)</th><th>DB (°C)</th><th>WB (°F)</th><th>WB (°C)</th><th>Source</th></tr>
+      ${rows}
+    </table>
+    ${estimateNote}${generalNote}
+    <div class="foot-note">${rec.notes}</div>
+  </div>
+  <div class="panel" style="margin-top:12px;">
+    <label class="override-toggle"><input type="checkbox" ${state.overrideOn?'checked':''} onchange="toggleOverride(this.checked)"> Enter a project-specific design condition (overrides the standard rating for this project only)</label>
+    ${state.overrideOn?`<div class="override-grid">
+      ${overrideField('Indoor DB (°F)','indoorDB')}
+      ${overrideField('Indoor WB (°F)','indoorWB')}
+      ${overrideField('Outdoor DB (°F)','outdoorDB')}
+      ${overrideField('Outdoor WB (°F)','outdoorWB')}
+    </div>${projectRows}`:""}
+    <div class="legend">
+      <span><span class="dot" style="background:var(--teal)"></span> Standard rating condition</span>
+      <span><span class="dot" style="background:var(--amber)"></span> User-defined project condition</span>
+      <span><span class="dot" style="background:var(--blue)"></span> Alternative standard</span>
+    </div>
+  </div>`;
+}
+function resultRow(label,cond){
+  const wbCellF = cond.wbF===null ? '<span class="est">—</span>' : `<span class="num">${fmt(cond.wbF,'')}</span>`;
+  const wbCellC = cond.wbC===null ? '<span class="est">—</span>' : `<span class="num">${fmt(cond.wbC,'')}</span>`;
+  return `<tr>
+    <td class="stream">${label}</td>
+    <td class="num">${fmt(cond.dbF,'')}</td>
+    <td class="num">${fmt(cond.dbC,'')}</td>
+    <td>${wbCellF}</td>
+    <td>${wbCellC}</td>
+    <td><span class="pill standard">STANDARD</span></td>
+  </tr>`;
+}
+function overrideField(label,key){
+  return `<div class="field"><label>${label}</label><input type="number" step="0.1" value="${state.project[key]}" oninput="state.project['${key}']=this.value; renderOverrideOnly();"></div>`;
+}
+function toggleOverride(v){ state.overrideOn=v; render(); }
+function renderOverrideOnly(){ render(); }
+function compareRow(label,std,proj){
+  if(proj===""||proj===undefined) return `<tr><td>${label}</td><td>${fmt(Number(std),'°F')}</td><td>—</td><td class="status">—</td></tr>`;
+  const diff = Math.abs(Number(proj)-Number(std));
+  const status = diff<0.05 ? '<span class="pill standard">MATCH</span>' : '<span class="pill override">OVERRIDE</span>';
+  return `<tr><td>${label}</td><td>${fmt(Number(std),'°F')}</td><td>${fmt(Number(proj),'°F')}</td><td class="status">${status}</td></tr>`;
+}
+
+/* ---------- Nav buttons ---------- */
+function navNext(step){
+  let ok = true;
+  if(step===1) ok = !!state.equipment;
+  if(step===2) ok = !!state.mode;
+  if(step===3) ok = !!state.country;
+  if(step===4) ok = !!state.climate;
+  if(step===5) ok = !!state.standardId;
+  return `<button class="step-btn" ${ok?'':'disabled'} onclick="goStep(${step+1})">Continue</button>`;
+}
+function navBack(step){
+  return `<button class="step-btn ghost" onclick="goStep(${step-1})">Back</button>`;
+}
+
+render();
+</script>
+</body>
+</html>
