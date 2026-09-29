@@ -1,17 +1,45 @@
 import type { Metadata } from "next";
+import { Public_Sans, IBM_Plex_Mono } from "next/font/google";
 import "./globals.css";
 
+/*
+ * Public Sans and IBM Plex Mono are the faces Sanjeev used in his prototypes.
+ * Loaded through next/font so they are self-hosted and preloaded — the
+ * prototypes pulled them from Google's CDN at runtime, which costs a render
+ * round-trip and leaks a request per visitor.
+ */
+const publicSans = Public_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
+  variable: "--font-public-sans",
+  display: "swap",
+});
+
+const plexMono = IBM_Plex_Mono({
+  subsets: ["latin"],
+  weight: ["400", "500", "600"],
+  variable: "--font-plex-mono",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
-  title: "Refrigeration Equivalent Length Calculator",
+  title: {
+    default: "HVACRiQNet — HVACR Virtual Engineering Tools",
+    template: "%s · HVACRiQNet",
+  },
   description:
-    "Build an actual refrigeration piping run — straight sections, rises, drops, fittings and valves — and get a traceable total equivalent length with every value showing its formula and source.",
+    "HVACR virtual engineering tools, intelligence and professional networking. Transparent, standards-referenced calculations for refrigeration and HVAC design.",
 };
 
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html
+      lang="en"
+      className={`${publicSans.variable} ${plexMono.variable}`}
+      suppressHydrationWarning
+    >
       <head>
         {/*
           Applies the saved theme before first paint. Without this the page

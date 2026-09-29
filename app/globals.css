@@ -6,117 +6,145 @@
  * Bare :root carries the COMPLETE light palette — every token is defined here
  * and nowhere else for the first time. The two blocks below only redefine
  * existing tokens, so a token can never be missing in one state.
+ *
+ * PALETTE SOURCE: the light values below are Sanjeev's own, lifted from
+ * `sources/entering-air/prototype-v2.html` (ink / paper / teal / amber / blue /
+ * red). He asked for the same look and feel as the prototypes he shared, so the
+ * hexes are his, mapped onto our semantic token names. Keeping the names means
+ * every existing component inherits the new look without being edited.
  */
 :root {
-  --bg: #f6f7f9;
+  /* paper / panel / line — prototype --paper, --panel, --line, --line-strong */
+  --bg: #f4f5f1;
   --surface: #ffffff;
-  --surface-2: #f1f3f6;
-  --surface-3: #e7eaef;
-  --border: #d8dee6;
-  --border-strong: #b9c3cf;
+  --surface-2: #eceee7;
+  --surface-3: #e2e5dc;
+  --border: #d9dcd3;
+  --border-strong: #b7bbaf;
 
-  --text: #11161d;
-  --text-muted: #5a6675;
-  --text-subtle: #7d8896;
+  /* prototype --ink, --ink-soft, --ink-faint */
+  --text: #171f24;
+  --text-muted: #4b565c;
+  --text-subtle: #7c878c;
 
-  --accent: #1d4ed8;
-  --accent-hover: #1e40af;
+  /* prototype --teal, --teal-dark, --teal-tint */
+  --accent: #0b6e68;
+  --accent-hover: #064a46;
   --accent-contrast: #ffffff;
-  --accent-soft: #e6edfd;
+  --accent-soft: #e2f0ee;
 
-  --pass: #15803d;
-  --pass-bg: #e7f6ec;
-  --pass-border: #a7d8b9;
+  /* PASS reads as the brand teal rather than a generic green, so a good result
+     and the brand are the same colour — as in the prototypes. */
+  --pass: #0b6e68;
+  --pass-bg: #e2f0ee;
+  --pass-border: #9cc9c5;
 
-  --warn: #a16207;
-  --warn-bg: #fdf5e3;
-  --warn-border: #e8d08a;
+  /* prototype --amber, --amber-tint */
+  --warn: #a8611e;
+  --warn-bg: #f6e9d9;
+  --warn-border: #e0c194;
 
-  --fail: #b91c1c;
-  --fail-bg: #fdecec;
-  --fail-border: #f0b4b4;
+  /* prototype --red, --red-tint */
+  --fail: #a23b2e;
+  --fail-bg: #f6e4e0;
+  --fail-border: #e0b0a7;
 
-  --unknown: #64748b;
-  --unknown-bg: #eef1f5;
-  --unknown-border: #cbd3dd;
+  /* prototype --blue, --blue-tint — "alternative / reference", not a failure */
+  --info: #2b5c8a;
+  --info-bg: #e4edf5;
+  --info-border: #adc6dc;
 
-  --code-bg: #f4f6f9;
-  --shadow: 0 1px 2px rgb(16 24 40 / 0.05), 0 1px 3px rgb(16 24 40 / 0.08);
+  --unknown: #7c878c;
+  --unknown-bg: #eceee7;
+  --unknown-border: #c9cdc2;
+
+  --code-bg: #f4f5f1;
+  --shadow: 0 1px 2px rgb(23 31 36 / 0.05), 0 1px 3px rgb(23 31 36 / 0.08);
 }
 
-/* System dark, unless the user has explicitly chosen light. */
+/* System dark, unless the user has explicitly chosen light.
+   Dark values are the prototype's hues held at dark-surface luminance — the
+   teal stays the accent, so the brand survives the theme switch. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0e1216;
-    --surface: #161b22;
-    --surface-2: #1c232c;
-    --surface-3: #252d38;
-    --border: #2b333e;
-    --border-strong: #3d4753;
+    --bg: #10161a;
+    --surface: #182126;
+    --surface-2: #1f2a30;
+    --surface-3: #27343b;
+    --border: #2d3a41;
+    --border-strong: #415057;
 
-    --text: #e8edf3;
-    --text-muted: #9aa7b6;
-    --text-subtle: #78869a;
+    --text: #e9ece8;
+    --text-muted: #a8b2b2;
+    --text-subtle: #7f8a8c;
 
-    --accent: #6a9bff;
-    --accent-hover: #8fb4ff;
-    --accent-contrast: #0e1216;
-    --accent-soft: #1a2740;
+    --accent: #4fb3aa;
+    --accent-hover: #74c9c1;
+    --accent-contrast: #10161a;
+    --accent-soft: #123330;
 
-    --pass: #5cc98a;
-    --pass-bg: #12261a;
-    --pass-border: #2c5a3c;
+    --pass: #4fb3aa;
+    --pass-bg: #123330;
+    --pass-border: #245a55;
 
-    --warn: #e3b341;
-    --warn-bg: #2a2113;
-    --warn-border: #5c4a1e;
+    --warn: #d99a4e;
+    --warn-bg: #2e2216;
+    --warn-border: #5e4526;
 
-    --fail: #f28b82;
-    --fail-bg: #2c1618;
-    --fail-border: #5f2b2b;
+    --fail: #e08273;
+    --fail-bg: #2f1a16;
+    --fail-border: #5e332b;
 
-    --unknown: #93a1b1;
-    --unknown-bg: #1c232c;
-    --unknown-border: #333d49;
+    --info: #6ea3cf;
+    --info-bg: #16242f;
+    --info-border: #2d4a63;
 
-    --code-bg: #12171d;
+    --unknown: #8b9698;
+    --unknown-bg: #1f2a30;
+    --unknown-border: #374348;
+
+    --code-bg: #131b1f;
     --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 1px 3px rgb(0 0 0 / 0.4);
   }
 }
 
 /* Explicit dark choice wins in both directions. */
 :root[data-theme="dark"] {
-  --bg: #0e1216;
-  --surface: #161b22;
-  --surface-2: #1c232c;
-  --surface-3: #252d38;
-  --border: #2b333e;
-  --border-strong: #3d4753;
+  --bg: #10161a;
+  --surface: #182126;
+  --surface-2: #1f2a30;
+  --surface-3: #27343b;
+  --border: #2d3a41;
+  --border-strong: #415057;
 
-  --text: #e8edf3;
-  --text-muted: #9aa7b6;
-  --text-subtle: #78869a;
+  --text: #e9ece8;
+  --text-muted: #a8b2b2;
+  --text-subtle: #7f8a8c;
 
-  --accent: #6a9bff;
-  --accent-hover: #8fb4ff;
-  --accent-contrast: #0e1216;
-  --accent-soft: #1a2740;
+  --accent: #4fb3aa;
+  --accent-hover: #74c9c1;
+  --accent-contrast: #10161a;
+  --accent-soft: #123330;
 
-  --pass: #5cc98a;
-  --pass-bg: #12261a;
-  --pass-border: #2c5a3c;
+  --pass: #4fb3aa;
+  --pass-bg: #123330;
+  --pass-border: #245a55;
 
-  --warn: #e3b341;
-  --warn-bg: #2a2113;
-  --warn-border: #5c4a1e;
+  --warn: #d99a4e;
+  --warn-bg: #2e2216;
+  --warn-border: #5e4526;
 
-  --fail: #f28b82;
-  --fail-bg: #2c1618;
-  --fail-border: #5f2b2b;
+  --fail: #e08273;
+  --fail-bg: #2f1a16;
+  --fail-border: #5e332b;
 
-  --unknown: #93a1b1;
-  --unknown-bg: #1c232c;
-  --unknown-border: #333d49;
+  --info: #6ea3cf;
+  --info-bg: #16242f;
+  --info-border: #2d4a63;
+
+  --unknown: #8b9698;
+  --unknown-bg: #1f2a30;
+  --unknown-border: #374348;
 
   --code-bg: #12171d;
   --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 1px 3px rgb(0 0 0 / 0.4);
@@ -145,10 +173,18 @@
   --color-fail: var(--fail);
   --color-fail-bg: var(--fail-bg);
   --color-fail-border: var(--fail-border);
+  --color-info: var(--info);
+  --color-info-bg: var(--info-bg);
+  --color-info-border: var(--info-border);
   --color-unknown: var(--unknown);
   --color-unknown-bg: var(--unknown-bg);
   --color-unknown-border: var(--unknown-border);
   --color-code-bg: var(--code-bg);
+
+  --font-sans: var(--font-public-sans), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, SFMono-Regular, "SF Mono", Menlo,
+    Consolas, monospace;
 }
 
 html {
@@ -166,9 +202,7 @@ html[data-theme="dark"] {
 body {
   background: var(--bg);
   color: var(--text);
-  font-family:
-    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial,
-    sans-serif;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -178,7 +212,7 @@ body {
 }
 
 .mono {
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-family: var(--font-mono);
 }
 
 /* Keyboard focus must stay visible on every interactive element. */
